@@ -1,6 +1,7 @@
 package com.example.mongocrud.repository;
 
 import com.example.mongocrud.model.Persona;
+import com.mongodb.client.result.DeleteResult;
 import org.bson.types.ObjectId;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Example;
@@ -10,7 +11,6 @@ import org.springframework.data.domain.Sort;
 import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.data.mongodb.core.query.Query;
-import org.springframework.data.mongodb.core.query.Update;
 import org.springframework.data.repository.query.FluentQuery;
 import org.springframework.stereotype.Service;
 
@@ -21,12 +21,15 @@ import java.util.function.Function;
 @Service
 public class MongoPersRepoImpl implements IPersonaRepositorio {
 
+
     private final MongoTemplate mongoTemplate;
 
     @Autowired
     public MongoPersRepoImpl(MongoTemplate mongoTemplate) {
         this.mongoTemplate = mongoTemplate;
     }
+
+
 
 
     @Override
@@ -43,35 +46,61 @@ public class MongoPersRepoImpl implements IPersonaRepositorio {
         return mongoTemplate.findOne(query, Persona.class);
     }
 
+
     @Override
-    public Persona findOneById(int id) {
+    public Persona findOneById(String id) {
         Query query = new Query();
-        query.addCriteria(Criteria.where("id_personpers").is(id));
+        query.addCriteria(Criteria.where("id").is(id));
         return mongoTemplate.findOne(query, Persona.class);
     }
 
 
     @Override
-    public List<Persona> findBySurName(String surname) {
+    public Persona findOneBySurName(String surname) {
         Query query = new Query();
         query.addCriteria(Criteria.where("surname").is(surname));
-        return mongoTemplate.findAll(Persona.class);
+        Persona personahallada = mongoTemplate.findOne(query, Persona.class);
+
+        if (personahallada == null) {
+            Persona noEncontrada = new Persona();
+            noEncontrada.setUsuario("No encuentro apellido = " + surname);
+            return noEncontrada;
+        }
+
+        return personahallada;
+
     }
 
 
     @Override
     public Persona updateOnePersona(Persona persona) {
-        Query query = new Query();
-        Update update = new Update().inc("id_personpers", 1);
-        mongoTemplate.findAndModify(query, update, Persona.class);
-        return persona;
+        Persona personaModificada = new Persona();
+        personaModificada = mongoTemplate.save(persona);
+        return personaModificada;
     }
 
 
     @Override
-    public List<Persona> getAllPersona() {
-        return mongoTemplate.findAll(Persona.class);
+    public DeleteResult deletePersona(Persona persona) {
+        return mongoTemplate.remove(persona);
     }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    //------------------------------------------------------------------------------------------------------------------
+    // No puedo declarar la clase "Abstracta" para eliminar estos métodos heredados que no uso.
+    // Si lo hago, SpringBoot da error (no puede crear "Beans" de clases abstractas).
 
     @Override
     public List<Persona> findAll() {
@@ -81,19 +110,6 @@ public class MongoPersRepoImpl implements IPersonaRepositorio {
     @Override
     public Iterable<Persona> findAllById(Iterable<ObjectId> objectIds) {
         return null;
-    }
-
-
-
-    /*@Override
-    public Iterable<Persona> findAllById(Iterable<Integer> integers) {
-        return null;
-    }*/
-
-
-    @Override
-    public void deletePersona(Persona persona) {
-       mongoTemplate.remove(persona);
     }
 
 
@@ -118,8 +134,6 @@ public class MongoPersRepoImpl implements IPersonaRepositorio {
     }
 
 
-
-
     @Override
     public long count() {
         return 0;
@@ -129,9 +143,6 @@ public class MongoPersRepoImpl implements IPersonaRepositorio {
     public void deleteById(ObjectId objectId) {
 
     }
-
-
-
 
 
     @Override
@@ -209,4 +220,5 @@ public class MongoPersRepoImpl implements IPersonaRepositorio {
     public <S extends Persona, R> R findBy(Example<S> example, Function<FluentQuery.FetchableFluentQuery<S>, R> queryFunction) {
         return null;
     }
+
 }

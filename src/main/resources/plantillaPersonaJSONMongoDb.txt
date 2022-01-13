@@ -1,0 +1,118 @@
+[
+
+{
+    "_id": "1",
+    "usuario": "usuario1",
+    "password": "pass1",
+    "name": "Toni",
+    "surname": "López",
+    "city": "Sabadell",
+    "created_date": "2001-01-01"
+
+},
+
+{
+    "_id": "2",
+    "usuario": "usuario2",
+    "password": "pass2",
+    "name": "Carlos",
+    "surname": "Andrade",
+    "city": "Sant Fost de Campcentelles",
+    "created_date": "2001-01-01"
+
+},
+
+{
+    "_id": "3",
+    "usuario": "usuario3",
+    "password": "pass3",
+    "name": "Benito",
+    "surname": "Villamrín",
+    "city": "Rubí",
+    "created_date": "2001-01-01"
+
+},
+
+{
+    "_id": "4",
+    "usuario": "usuario4",
+    "password": "pass4",
+    "name": "Sergi",
+    "surname": "López",
+    "city": "Montcata i Reixac",
+    "created_date": "2001-01-01"
+
+},
+
+{
+    "_id": "5",
+    "usuario": "usuario5",
+    "password": "pass5",
+    "name": "Patxi",
+    "surname": "Magunacelaya",
+    "city": "Arrasate",
+    "created_date": "2001-01-01"
+
+},
+
+{
+    "_id": "6",
+    "usuario": "usuario6",
+    "password": "Andrés",
+    "name": "Toni",
+    "surname": "Vargas",
+    "city": "Manresa",
+    "created_date": "2001-01-01"
+
+},
+
+{
+    "_id": "7",
+    "usuario": "usuario7",
+    "password": "pass7",
+    "name": "Toribio",
+    "surname": "Alcatraz",
+    "city": "Muniz",
+    "created_date": "2001-01-01"
+
+},
+
+{
+    "_id": "8",
+    "usuario": "usuario8",
+    "password": "pass8",
+    "name": "Francisca",
+    "surname": "Menendez",
+    "city": "El Vendrell",
+    "created_date": "2001-01-01"
+
+},
+
+{
+    "_id": "9",
+    "usuario": "usuario9",
+    "password": "pass9",
+    "name": "Benigno",
+    "surname": "Dos pasos",
+    "city": "Santa Susanna",
+    "created_date": "2001-01-01"
+
+},
+
+{
+    "_id": "10",
+    "usuario": "usuario10",
+    "password": "pass10",
+    "name": "Saul",
+    "surname": "Morella",
+    "city": "Ripollet",
+    "created_date": "2001-01-01"
+
+}
+
+
+
+]
+
+
+

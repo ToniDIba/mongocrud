@@ -1,25 +1,16 @@
 package com.example.mongocrud.controller;
 
 
-import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
-
-
-import com.example.mongocrud.MongoCli;
 import com.example.mongocrud.model.Persona;
 import com.example.mongocrud.repository.MongoPersRepoImpl;
-import com.mongodb.client.MongoCollection;
-import com.mongodb.client.MongoDatabase;
-import org.bson.Document;
+import com.mongodb.client.result.DeleteResult;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-
-
 
 
 @RestController
@@ -28,12 +19,21 @@ public class PersonaController {
     @Autowired
     MongoPersRepoImpl personaRepositorio;
 
-    //public PersonaController() throws UnknownHostException { }
-    //MongoDatabase mydatabase = MongoCli.conectar();
-    //MongoCollection<Document> micollection = mydatabase.getCollection("personas");
-    //MongoCollection<Document> micollection;
 
-    // http://localhost:8085/Personas/addnewpers
+    /*
+     * Añade personas a la lista:  http://localhost:8085/Personas/addnewpers
+     * {
+     *   "id": "17",
+     *   "usuario": "usuario2",
+     *   "password": "pass2",
+     *   "name": "Paco",
+     *   "surname": "Maravillas",
+     *   "city": "Jaén",
+     *   "created_date": "2002-02-02"
+     * }
+     * */
+
+
     @PostMapping("/Personas/addnewpers")
     public ResponseEntity<String> createPersona(@RequestBody Persona persona) {
         System.out.println("paso");
@@ -49,20 +49,24 @@ public class PersonaController {
     }
 
 
+
+
     /*
      * Busca persona por nombre:  http://localhost:8085/Personas/pornombre/Carla
+     *
+     * Si existe, lo muestra
+     * Si no existe, se queja
+     * Si no llega valor, muestra todos
+     *
      * */
-    @GetMapping("/Personas/pornombre/{nombre}")
-    //@RequestMapping(value = { "/Personas/pornombre/{nombre}","/Personas/pornombre/" })
+    @RequestMapping(value = {"/Personas/pornombre/{nombre}", "/Personas/pornombre/"})
     public ResponseEntity<List<Persona>> findByName(@PathVariable("nombre") Optional<String> nombre) {
 
-        System.out.println("Entrado: " + nombre);
         List<Persona> personaList = new ArrayList<Persona>();
 
         try {
 
             if (nombre.isEmpty()) {
-                //personaRepositorio.getAllPersona().forEach(personaList::add);
                 personaList = personaRepositorio.findAll();
             } else {
                 Persona unaPersona = personaRepositorio.findOneByName(nombre.get());
@@ -73,7 +77,6 @@ public class PersonaController {
                 Persona empty = new Persona();
                 empty.setUsuario("No encuentro personas con nombre = " + nombre.get());
                 personaList.add(empty);
-                //return new ResponseEntity<>(HttpStatus.NO_CONTENT);
                 return new ResponseEntity<>(personaList, HttpStatus.OK);
             }
 
@@ -89,44 +92,35 @@ public class PersonaController {
 
 
 
+
+
     /*
-     * Busca personas cuyo apellido contenga una cadena pasada por parámetro "substring"
-     * Por ejemplo, para: http://localhost:8085/Personas/apellidocontiene/?substring=Mart
-     * ...retornará todos los "Martín", "Martinez", "Martillo"... que existan en la tabla.
+     * Busca persona por apellido:  http://localhost:8085/Personas/porapellido/Gonzalez
      *
-     * Si el parámetro "substring" llega vacío:
-     * http://localhost:8085/Personas/apellidocontiene/
-     * ...se retornarán todas las filas de la tabla
+     * Si existe, lo muestra
+     * Si no existe, se queja
+     * Si no llega valor, se queja
+     *
      * */
+    @RequestMapping(value = {"/Personas/porapellido/{surname}", "/Personas/porapellido/"})
+    public ResponseEntity<Persona> findBySurName(@PathVariable("surname") Optional<String> surname) {
 
-    @DateTimeFormat(pattern="yyyy-MM-dd HH:mm:ss")
-    @GetMapping("/Personas/apellidocontiene/{substring}")
-    public ResponseEntity<List<Persona>> getAllPersonas(@RequestParam(required = false) String substring) {
+        Persona unaPersona = new Persona();
 
-        List<Persona> personaList = new ArrayList<Persona>();
+        unaPersona.setUsuario("manauel");
 
         try {
-
-            if (substring == null)
-                personaRepositorio.getAllPersona().forEach(personaList::add);
-            else
-                personaRepositorio.findBySurName(substring).forEach(personaList::add);
-
-            if (personaList.isEmpty()) {
-                Persona empty = new Persona();
-                empty.setUsuario("No encuentro apellidos que contengan = " + substring);
-                personaList.add(empty);
-                //return new ResponseEntity<>(HttpStatus.NO_CONTENT);
-                return new ResponseEntity<>(personaList, HttpStatus.OK);
+            if (surname.isEmpty()) {
+                unaPersona.setUsuario("Debe informar un apellido por el que buscar...");
+            } else {
+                unaPersona = personaRepositorio.findOneBySurName(surname.get());
             }
 
-            return new ResponseEntity<>(personaList, HttpStatus.OK);
+            return new ResponseEntity<>(unaPersona, HttpStatus.OK);
 
         } catch (Exception e) {
-            Persona empty = new Persona();
-            empty.setUsuario(e.getMessage());
-            personaList.add(empty);
-            return new ResponseEntity<>(personaList, HttpStatus.INTERNAL_SERVER_ERROR);
+            unaPersona.setUsuario(e.getMessage());
+            return new ResponseEntity<>(unaPersona, HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
 
@@ -135,59 +129,64 @@ public class PersonaController {
 
     /*
      * Hace un update de columnas "name", "surname" y "city" de un persona con el "id" entrado por parámetro:
-     * Por ejemplo: http://localhost:8085/Personas/modif/1
-     * Si la persona no existe, retorna: "No encuentro persona con id = nnn"
+     * Por ejemplo: http://localhost:8085/Personas/modif/17
+     * Si la persona no existe, retorna error
      *
      * {
-     *
      *   "name": "Tomas",
      *   "surname": "Delhort",
      *   "city": "Sanabria"
-     *
      * }
      * */
 
-    @PutMapping("/Personas/modif/{id_personpers}")
-    public ResponseEntity<String> updatePersona(@PathVariable("id_personpers") int id_personpers, @RequestBody Persona Persona) {
+    @PutMapping("/Personas/modif/{id}")
+    public ResponseEntity<String> updatePersona(@PathVariable("id") String id, @RequestBody Persona personaReq) {
 
-        Persona perso = personaRepositorio.findOneById(id_personpers);
+        Persona unaPersona = personaRepositorio.findOneById(id);
+        if (unaPersona == null) return new ResponseEntity<>("No encuentro para modificar persona con ID = " + id, HttpStatus.OK);
 
-        if (perso == null) {
-            return new ResponseEntity<>("No encuentro persona con ID = " + id_personpers, HttpStatus.OK);
+        //Modifico "name", "surname" y "city" con los valores informados en "RequestBody"
+        try {
+            unaPersona.setName(personaReq.getName());
+            unaPersona.setSurname(personaReq.getSurname());
+            unaPersona.setCity(personaReq.getCity());
+
+            Persona persRepo = personaRepositorio.updateOnePersona(unaPersona);
+            return new ResponseEntity<>("Persona modificada de forma correcta. Nueva ciudad: " + persRepo.getCity(), HttpStatus.OK);
+
+        } catch (Exception e) {
+            return new ResponseEntity<>("Error en update: " + e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
         }
 
-        perso.setName(Persona.getName());
-        perso.setSurname(Persona.getSurname());
-        perso.setCity(Persona.getCity());
-
-        Persona persRepo = personaRepositorio.updateOnePersona(perso);
-        return new ResponseEntity<>("Persona modificada de forma correcta.", HttpStatus.OK);
-
     }
+
 
 
     /*
      * Borra por número de id: http://localhost:8085/Personas/deletebyid/8
      * */
-    @DeleteMapping("/Personas/deletebyid/{id_personpers}")
-    public ResponseEntity<String> deletePersona(@PathVariable("id_personpers") int id_personpers) {
+    @DeleteMapping("/Personas/deletebyid/{id}")
+    public ResponseEntity<String> deletePersona(@PathVariable("id") String id) {
+
         try {
 
-            Persona perso = personaRepositorio.findOneById(id_personpers);
+            Persona perso = personaRepositorio.findOneById(id);
 
-            if (perso == null) {
-                return new ResponseEntity<>("No encuentro para borrar persona con ID = " + id_personpers, HttpStatus.OK);
+            if (perso == null) return new ResponseEntity<>("No encuentro para borrar persona con ID = " + id, HttpStatus.OK);
+
+            DeleteResult deleteResult;
+            deleteResult = personaRepositorio.deletePersona(perso);
+
+            if (deleteResult.getDeletedCount() == 0)
+            {
+                return new ResponseEntity<>("No encuentro para borrar persona con id = " + id, HttpStatus.OK);
+            }
+            else {
+                return new ResponseEntity<>("Persona borrada de forma satisfactoria.", HttpStatus.OK);
             }
 
-            personaRepositorio.deletePersona(perso);
-            int result = 4;
-
-            if (result == 0) {
-                return new ResponseEntity<>("No encuentro para borrar persona con id = " + id_personpers, HttpStatus.OK);
-            }
-            return new ResponseEntity<>("Persona borrada de forma satisfactoria.", HttpStatus.OK);
         } catch (Exception e) {
-            return new ResponseEntity<>("Persona con id = " + id_personpers + ": " + e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
+            return new ResponseEntity<>(" Al borrar persona con id = " + id + ": " + e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
 

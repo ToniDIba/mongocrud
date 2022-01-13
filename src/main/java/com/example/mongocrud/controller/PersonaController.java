@@ -36,9 +36,9 @@ public class PersonaController {
 
     @PostMapping("/Personas/addnewpers")
     public ResponseEntity<String> createPersona(@RequestBody Persona persona) {
-        System.out.println("paso");
+        System.out.println("paso: " + persona.get_id());
         try {
-            personaRepositorio.savePersona(new Persona(persona.getId(), persona.getUsuario(), persona.getPassword(),
+            personaRepositorio.savePersona(new Persona(persona.get_id(), persona.getUsuario(), persona.getPassword(),
                     persona.getName(), persona.getSurname(), persona.getCity(),
                     persona.getCreated_date()));
 

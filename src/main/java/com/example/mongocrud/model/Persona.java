@@ -11,7 +11,7 @@ import org.springframework.data.mongodb.core.mapping.Document;
 public class Persona {
 
     @Id
-    public String id;
+    public String _id;
     public String usuario;
     public String password;
     public String name;
@@ -25,7 +25,7 @@ public class Persona {
     public Persona() { }
 
     public Persona(String id, String usuario, String password, String name, String surname, String city, String created_date) {
-        this.id = id;
+        this._id = id;
         this.usuario = usuario;
         this.password = password;
         this.name = name;
@@ -41,7 +41,7 @@ public class Persona {
         return String.format("Persona{id='%s',   usuario='%s',  password=%s," +
                         "             name='%s', surname=%s," +
                         "             city='%s', created_date=%s }\n",
-                id, usuario, password, name, surname, city, created_date  );
+                _id, usuario, password, name, surname, city, created_date  );
     }
 
 }

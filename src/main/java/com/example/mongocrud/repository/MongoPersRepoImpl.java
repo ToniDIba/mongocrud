@@ -50,7 +50,7 @@ public class MongoPersRepoImpl implements IPersonaRepositorio {
     @Override
     public Persona findOneById(String id) {
         Query query = new Query();
-        query.addCriteria(Criteria.where("id").is(id));
+        query.addCriteria(Criteria.where("_id").is(id));
         return mongoTemplate.findOne(query, Persona.class);
     }
 
